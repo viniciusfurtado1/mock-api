@@ -4,6 +4,7 @@ import com.example.MockApi.domain.User;
 import com.example.MockApi.domain.dto.UserDTO;
 import com.example.MockApi.repositories.UserRepository;
 import com.example.MockApi.services.UserService;
+import com.example.MockApi.services.exceptions.DataIntegrityViolationException;
 import com.example.MockApi.services.exceptions.ObjectNotFoundException;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +34,14 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User create(UserDTO obj) {
+        findByEmail(obj);
         return repository.save(mapper.map(obj, User.class));
+    }
+
+    public void findByEmail(UserDTO obj) {
+        Optional<User> user = repository.findByEmail(obj.getEmail());
+        if (user.isPresent()) {
+            throw new DataIntegrityViolationException("E-mail já cadastrado no sistema.");
+        }
     }
 }
